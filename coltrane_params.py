@@ -62,7 +62,7 @@ def coltrane_params(**kwargs):
     # range of generation lengths to evaluate (in integer years)
     
     ## PREDATION
-    p = set_default(p, 'preySatVersion', 'biomas_dia21')
+    p = set_default(p, 'preySatVersion', 'default')
     p = set_default(p, 'KsIA', 0.2)
     p = set_default(p, 'iceToSat', 1)
     p = set_default(p, 'Ks', 1.2)  # prey half-saturation; same units as P
