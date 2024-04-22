@@ -8,6 +8,7 @@ Coltrane - Forcing time series
 """
 
 import numpy as np
+from Create_ts_BB_or_NOW_v2 import time_series_NOW_BB
 
 def coltrane_forcing(region, Nyears):
     """
@@ -88,5 +89,39 @@ def coltrane_forcing(region, Nyears):
         forcing['T0'] = np.tile(forcing['T0'], Nyears)
         forcing['Td'] = np.tile(forcing['Td'], Nyears)
         forcing['P'] = np.tile(forcing['P'], Nyears)
+        
+    if region == "NOW":
+        
+        forcing = time_series_NOW_BB("NOW",
+                                     2013,
+                                     2013,
+                                     "/Users/luciebourreau/Library/CloudStorage/OneDrive-UniversitéLaval/PhD_ULaval/Data/NOW_BB_profiles_Inge/",
+                                     True)
+        
+        forcing['t'] = np.arange(0, Nyears * 365)
+        
+        keys = list(forcing.keys())
+        keys.remove('t')
+        keys.remove('year')
+        
+        for key in keys:
+            forcing[key] = np.tile(forcing[key], Nyears)
+        
+    if region == "BB":
+        
+        forcing = time_series_NOW_BB("BB",
+                                     2013,
+                                     2013,
+                                     "/Users/luciebourreau/Library/CloudStorage/OneDrive-UniversitéLaval/PhD_ULaval/Data/NOW_BB_profiles_Inge/",
+                                     True)
+        
+        forcing['t'] = np.arange(0, Nyears * 365)
+        
+        keys = list(forcing.keys())
+        keys.remove('t')
+        keys.remove('year')
+        
+        for key in keys:
+            forcing[key] = np.tile(forcing[key], Nyears)
     
     return forcing
