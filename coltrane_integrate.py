@@ -134,7 +134,7 @@ def coltrane_integrate(forcing,p,t0):
     toolate = np.any((v['D'] < 1) & (isineggprod), axis=0)
     v['D'][:, toolate] = np.nan
     if np.all(toolate):
-        None # if there are no good solutions at all, don't bother with the rest of the model
+        return None # if there are no good solutions at all, don't bother with the rest of the model
     
     # Calculate D in middle of first winter, just as a diagnostic
     year = v['t0'] // 365
