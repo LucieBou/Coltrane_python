@@ -232,9 +232,6 @@ def coltrane_integrate(forcing,p,t0):
     # Update the estimate of We
     v['We'] = p['r_ea'] * v['Wa'] ** p['exp_ea']
 
-    # Capital fraction of egg production
-    v['capfrac'] = np.nansum(v['E'] - v['Einc'], axis=0) / np.nansum(v['E'], axis=0)
-
     # W and R at all stages
     stages = ['N6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6']
     for i in range(1, len(stages) - 1):
@@ -259,7 +256,12 @@ def coltrane_integrate(forcing,p,t0):
     isstarving = v['R'] < -p['rstarv'] * v['W']
     isalive = isalive & (np.cumsum(isstarving, axis=0) == 0)
     isineggprod = isineggprod & isalive
+    
     v['E'][~isalive] = 0
+    v['Einc'][~isalive] = 0
+    
+    # Capital fraction of egg production
+    v['capfrac'] = np.nansum(v['E'] - v['Einc'], axis=0) / np.nansum(v['E'], axis=0)
     
     # Mortality and survivorship: N(t) ---------------------------------------------------------------------
     
