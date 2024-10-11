@@ -1,0 +1,9 @@
+# Ignore Python cache files
+*.pyc
+__pycache__/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore R history files
+.Rhistory
