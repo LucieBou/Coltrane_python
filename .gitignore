@@ -7,3 +7,6 @@ __pycache__/
 
 # Ignore R history files
 .Rhistory
+
+# Ignore disko_ex file
+disko_ex
