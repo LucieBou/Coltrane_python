@@ -33,14 +33,16 @@ def timing_combinations(forcing, p):
     
     ## YEARDAY OF DIAPAUSE EXIT
     tdia_exit = p['tdia_exit']
-    if not tdia_exit or tdia_exit == 'default':
-        tdia_exit = np.arange(0, 365/2, p['dt_dia'])
-    
+    if isinstance(tdia_exit, list):
+        if len(tdia_exit) == 0 or (tdia_exit == 'default'):
+            tdia_exit = np.arange(0, 365 / 2, p['dt_dia'])
+
     ## YEARDAY OF DIAPAUSE ENTRY
     tdia_enter = p['tdia_enter']
-    if not tdia_enter or tdia_enter == 'default':
-        tdia_enter = np.arange(max(tdia_exit) + p['dt_dia'], 365, p['dt_dia'])
-    
+    if isinstance(tdia_enter, list):
+        if len(tdia_enter) == 0 or tdia_enter == 'default':
+            tdia_enter = np.arange(max(tdia_exit) + p['dt_dia'], 365, p['dt_dia'])
+        
     ## THE DATE THAT EGG PRODUCTION BEGINS RELATIVE TO t0
     dtegg = p['dtegg']
     if len(dtegg) == 0:
