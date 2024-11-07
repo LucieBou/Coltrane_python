@@ -80,7 +80,7 @@ def coltrane_population(forcing,p,nargout):
     t0,s = timing_combinations(forcing, p)
     strategy_fields = list(s.keys())
     NC = len(t0)
-    NS = np.prod(s[strategy_fields[0]].shape)  # Assuming there are two strategy fields
+    NS = np.prod(s[strategy_fields[0]].shape)
     
     # Run one strategy at a time ---------------------------------------------------------------------------
     
@@ -89,7 +89,7 @@ def coltrane_population(forcing,p,nargout):
 
     for i in tqdm(range(NS), desc="Running strategies"):
         pii = add_strategy_to_params(p, s, i)
-        out[i] = coltrane_integrate(forcing, pii, t0)  # Replace with your actual function
+        out[i] = coltrane_integrate(forcing, pii, t0) 
         if not retain_time_series:
             out[i] = drop_time_series(out[i], ts_always_keep)
     
