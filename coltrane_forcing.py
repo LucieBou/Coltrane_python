@@ -95,7 +95,7 @@ def coltrane_forcing(region, Nyears):
         forcing = time_series_NOW_BB("NOW",
                                      2013,
                                      2013,
-                                     "/Users/luciebourreau/Library/CloudStorage/OneDrive-UniversitéLaval/PhD_ULaval/Data/NOW_BB_profiles_Inge/",
+                                     #"/Users/luciebourreau/Library/CloudStorage/OneDrive-UniversitéLaval/PhD_ULaval/Data/NOW_BB_profiles_Inge/",
                                      True)
         
         forcing['t'] = np.arange(0, Nyears * 365)
@@ -112,7 +112,7 @@ def coltrane_forcing(region, Nyears):
         forcing = time_series_NOW_BB("BB",
                                      2013,
                                      2013,
-                                     "/Users/luciebourreau/Library/CloudStorage/OneDrive-UniversitéLaval/PhD_ULaval/Data/NOW_BB_profiles_Inge/",
+                                     #"/Users/luciebourreau/Library/CloudStorage/OneDrive-UniversitéLaval/PhD_ULaval/Data/NOW_BB_profiles_Inge/",
                                      True)
         
         forcing['t'] = np.arange(0, Nyears * 365)
