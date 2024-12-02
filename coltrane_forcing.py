@@ -7,7 +7,9 @@ Coltrane - Forcing time series
 @date 2023/11/29
 """
 
+import os
 import numpy as np
+import pandas as pd
 from Create_ts_BB_or_NOW_v2 import time_series_NOW_BB
 
 def coltrane_forcing(region, Nyears):
@@ -124,4 +126,56 @@ def coltrane_forcing(region, Nyears):
         for key in keys:
             forcing[key] = np.tile(forcing[key], Nyears)
     
+    if region == "Qik_mod_2015":
+
+        forcing['t'] = np.arange(0, 365)  # start with one year
+        forcing['T0'] = np.nan * forcing['t']
+        forcing['Td'] = np.nan * forcing['t']
+        forcing['P'] = np.nan * forcing['t']
+
+        # Load the data
+        script_dir = os.path.dirname(os.path.abspath(__name__))  # Répertoire du script
+        NEMO_file_path = os.path.join(script_dir, 'model/NEMO_T0_Td_Qik_2016.csv')
+        fluo_file_path = os.path.join(script_dir, 'model/max_fluo_mod_obs_qik_2015_lowess016.csv')
+
+        NEMO = pd.read_csv(NEMO_file_path)
+        max_fluo = pd.read_csv(fluo_file_path)
+
+        forcing['T0'] = NEMO['NEMO_T0']
+        forcing['Td'] = NEMO['NEMO_Td']
+        forcing['P'] = max_fluo['Max_fluo_obs_mod']
+
+        ## Repeat this cycle for Nyears
+
+        forcing['t'] = np.arange(0, Nyears * 365)
+        forcing['T0'] = np.tile(forcing['T0'], Nyears)
+        forcing['Td'] = np.tile(forcing['Td'], Nyears)
+        forcing['P'] = np.tile(forcing['P'], Nyears)
+
+    if region == "Qik_obs_2015":
+
+        forcing['t'] = np.arange(0, 365)  # start with one year
+        forcing['T0'] = np.nan * forcing['t']
+        forcing['Td'] = np.nan * forcing['t']
+        forcing['P'] = np.nan * forcing['t']
+
+        # Load the data
+        script_dir = os.path.dirname(os.path.abspath(__name__))  # Répertoire du script
+        NEMO_file_path = os.path.join(script_dir, 'model/NEMO_T0_Td_Qik_2016.csv')
+        fluo_file_path = os.path.join(script_dir, 'model/max_fluo_obs_qik_2015_lowess025.csv')
+
+        NEMO = pd.read_csv(NEMO_file_path)
+        max_fluo = pd.read_csv(fluo_file_path)
+
+        forcing['T0'] = NEMO['NEMO_T0']
+        forcing['Td'] = NEMO['NEMO_Td']
+        forcing['P'] = max_fluo['Max_fluo_obs_fill']
+
+        ## Repeat this cycle for Nyears
+
+        forcing['t'] = np.arange(0, Nyears * 365)
+        forcing['T0'] = np.tile(forcing['T0'], Nyears)
+        forcing['Td'] = np.tile(forcing['Td'], Nyears)
+        forcing['P'] = np.tile(forcing['P'], Nyears)
+
     return forcing
