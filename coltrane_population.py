@@ -87,7 +87,8 @@ def coltrane_population(forcing,p,nargout):
     out = [None] * NS
     print(f"{NT} timesteps x {NC} compupods x {NS} strategies")
 
-    for i in tqdm(range(NS), desc="Running strategies"):
+    for i in range(NS):
+    #for i in tqdm(range(NS), desc="Running strategies"):
         pii = add_strategy_to_params(p, s, i)
         out[i] = coltrane_integrate(forcing, pii, t0) 
         if not retain_time_series:
