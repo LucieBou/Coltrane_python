@@ -164,7 +164,7 @@ def coltrane_forcing(region, Nyears):
         # NEMO_file_path = os.path.join(script_dir, 'model/NEMO_T0_Td_Qik_2016.csv')
         # fluo_file_path = os.path.join(script_dir, 'model/max_fluo_obs_qik_2015_lowess025.csv')
 
-        script_dir = os.path.dirname(...)  # Script repository
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Script repository
         NEMO_file_path = os.path.join(script_dir, 'NEMO_T0_Td_Qik_2016.csv')
         fluo_file_path = os.path.join(script_dir, 'max_fluo_obs_qik_2015_lowess025.csv')
 
