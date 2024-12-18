@@ -160,9 +160,14 @@ def coltrane_forcing(region, Nyears):
         forcing['P'] = np.nan * forcing['t']
 
         # Load the data
-        script_dir = os.path.dirname(os.path.abspath(__name__))  # Répertoire du script
-        NEMO_file_path = os.path.join(script_dir, 'model/NEMO_T0_Td_Qik_2016.csv')
-        fluo_file_path = os.path.join(script_dir, 'model/max_fluo_obs_qik_2015_lowess025.csv')
+        # script_dir = os.path.dirname(os.path.abspath(__name__))  # Répertoire du script
+        # NEMO_file_path = os.path.join(script_dir, 'model/NEMO_T0_Td_Qik_2016.csv')
+        # fluo_file_path = os.path.join(script_dir, 'model/max_fluo_obs_qik_2015_lowess025.csv')
+
+        script_dir = os.path.dirname(...)  # Script repository
+        NEMO_file_path = os.path.join(script_dir, 'NEMO_T0_Td_Qik_2016.csv')
+        fluo_file_path = os.path.join(script_dir, 'max_fluo_obs_qik_2015_lowess025.csv')
+
 
         NEMO = pd.read_csv(NEMO_file_path)
         max_fluo = pd.read_csv(fluo_file_path)
