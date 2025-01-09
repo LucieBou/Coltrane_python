@@ -109,7 +109,7 @@ def coltrane_forcing(region, Nyears):
         for key in keys:
             forcing[key] = np.tile(forcing[key], Nyears)
         
-    if region == "BB":
+    if region == "BB_biogeo_model":
         
         forcing = time_series_NOW_BB("BB",
                                      2013,
@@ -145,8 +145,7 @@ def coltrane_forcing(region, Nyears):
         forcing['Td'] = NEMO['NEMO_Td']
         forcing['P'] = max_fluo['Max_fluo_obs_mod']
 
-        ## Repeat this cycle for Nyears
-
+        # Repeat this cycle for Nyears
         forcing['t'] = np.arange(0, Nyears * 365)
         forcing['T0'] = np.tile(forcing['T0'], Nyears)
         forcing['Td'] = np.tile(forcing['Td'], Nyears)
@@ -164,7 +163,6 @@ def coltrane_forcing(region, Nyears):
         NEMO_file_path = os.path.join(script_dir, 'NEMO_T0_Td_Qik_2016.csv')
         fluo_file_path = os.path.join(script_dir, 'max_fluo_obs_qik_2015_lowess025.csv')
 
-
         NEMO = pd.read_csv(NEMO_file_path)
         max_fluo = pd.read_csv(fluo_file_path)
 
@@ -172,11 +170,37 @@ def coltrane_forcing(region, Nyears):
         forcing['Td'] = NEMO['NEMO_Td']
         forcing['P'] = max_fluo['Max_fluo_obs_fill']
 
-        ## Repeat this cycle for Nyears
-
+        # Repeat this cycle for Nyears
         forcing['t'] = np.arange(0, Nyears * 365)
         forcing['T0'] = np.tile(forcing['T0'], Nyears)
         forcing['Td'] = np.tile(forcing['Td'], Nyears)
         forcing['P'] = np.tile(forcing['P'], Nyears)
+
+    if region == "BB":
+        
+        forcing['t'] = np.arange(0, 365)  # start with one year
+        forcing['T0'] = np.nan * forcing['t']
+        forcing['Td'] = np.nan * forcing['t']
+        forcing['P'] = np.nan * forcing['t']
+
+        # Load the data
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Script repository
+        T0_file_path = os.path.join(script_dir, 'T0_Argo_2018_lowess03.csv')
+        Td_file_path = os.path.join(script_dir, 'Td_Argo_2018_lowess03.csv')
+        fluo_file_path = os.path.join(script_dir, 'max_fluo_Argo_2018_lowess02.csv')
+
+        T0_data = pd.read_csv(T0_file_path)
+        Td_data = pd.read_csv(Td_file_path)
+        fluo_data = pd.read_csv(fluo_file_path)
+
+        forcing['T0'] = T0_data['Interpolated_T0']
+        forcing['Td'] = Td_data['Interpolated_Td']
+        forcing['P'] = fluo_data['Interpolated_CorFChla']
+
+        # Repeat this cycle for Nyears
+        forcing['t'] = np.arange(0, Nyears * 365)
+        forcing['T0'] = np.tile(forcing['T0'], Nyears)
+        forcing['Td'] = np.tile(forcing['Td'], Nyears)
+        forcing['P'] = np.tile(forcing['P'], Nyears)        
 
     return forcing
