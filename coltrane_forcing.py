@@ -187,7 +187,7 @@ def coltrane_forcing(region, Nyears):
         script_dir = os.path.dirname(os.path.abspath(__file__))  # Script repository
         T0_file_path = os.path.join(script_dir, 'T0_Argo_2018_lowess015.csv')
         Td_file_path = os.path.join(script_dir, 'Td_Argo_2018_lowess03.csv')
-        fluo_file_path = os.path.join(script_dir, 'max_fluo_Argo_2018_lowess02.csv')
+        fluo_file_path = os.path.join(script_dir, 'max_fluo_maxday_Argo_2018_lowess015.csv')
 
         T0_data = pd.read_csv(T0_file_path)
         Td_data = pd.read_csv(Td_file_path)
