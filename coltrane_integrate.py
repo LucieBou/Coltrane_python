@@ -10,7 +10,7 @@ Coltrane - coltrane_integrate
 # Load the packages
 
 import numpy as np
-from datetime import date
+from datetime import date 
 
 # Load the functions
 
