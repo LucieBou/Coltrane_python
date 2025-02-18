@@ -102,8 +102,8 @@ def coltrane_forcing(region, Nyears):
         
         forcing['t'] = np.arange(0, Nyears * 365)
         
-        script_dir = os.path.dirname(os.path.abspath(__name__))  # script repository
-        file_path = os.path.join(script_dir, 'model/Interpolated_Chl_a_data_NOW.csv')
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # script repository
+        file_path = os.path.join(script_dir, 'Interpolated_Chl_a_data_NOW.csv')
         
         chl = pd.read_csv(file_path)
         
