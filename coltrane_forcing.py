@@ -103,11 +103,16 @@ def coltrane_forcing(region, Nyears):
         forcing['t'] = np.arange(0, Nyears * 365)
         
         script_dir = os.path.dirname(os.path.abspath(__file__))  # script repository
-        file_path = os.path.join(script_dir, 'Interpolated_Chl_a_data_NOW.csv')
         
-        chl = pd.read_csv(file_path)
-        
+        # Preys
+        chl_file_path = os.path.join(script_dir, 'Interpolated_Chl_a_data_NOW.csv')
+        chl = pd.read_csv(chl_file_path)
         forcing['P'] = chl['chla']
+        
+        # Ice
+        ice_file_path = os.path.join(script_dir, 'NOW_ice_concentration_timeseries_2013.csv')
+        ice = pd.read_csv(ice_file_path)
+        forcing['ice'] = ice['Mean_Ice_Concentration']
         
         keys = list(forcing.keys())
         keys.remove('t')
