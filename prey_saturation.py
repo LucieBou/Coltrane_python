@@ -112,7 +112,7 @@ def prey_saturation(v0, p):
 
         v['sat'] = np.maximum(v['satWC'], v['satIA'])
     
-    if p['preySatVersion'].lower() == 'NOW_icealg':
+    if p['preySatVersion'].lower() == 'now_icealg':
         
         # Prey saturation considering water-column prey only
         # To be able to do arithmetic operations on dict we need to convert the list from the dict to numpy array
