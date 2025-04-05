@@ -60,7 +60,7 @@ def prey_saturation(v0, p):
         
         v['sat'] = np.maximum(v['satWC'], v['satIA'])
         
-    elif p['preySatVersion'].lower() == 'biomas_dia19a':
+    if p['preySatVersion'].lower() == 'biomas_dia19a':
                 # Same as biomas_dia19 below, but tIA is a function of latitude chosen so that the time point 1/3
                 # of the way through the dtIA interval aligns with the bloom max a function of latitude from 
                 # Castellani et al. 2017 so dtIA and iceToSat are the free parameters.
@@ -82,7 +82,7 @@ def prey_saturation(v0, p):
 
                 v['sat'] = np.maximum(v['satWC'], v['satIA'])
 
-    elif p['preySatVersion'].lower() == 'biomas_dia19':
+    if p['preySatVersion'].lower() == 'biomas_dia19':
         if 'Ptot' not in v:
             v['Ptot'] = v['flagel'] + v['diatom']
 
@@ -99,7 +99,7 @@ def prey_saturation(v0, p):
 
                 v['sat'] = np.maximum(v['satWC'], v['satIA'])
 
-    elif p['preySatVersion'].lower() == 'satellite_dia18':
+    if p['preySatVersion'].lower() == 'satellite_dia18':
         # Prey saturation considering water-column prey only 
         v['chl'][np.isnan(v['chl']) & (np.array(v['ice']) > 0.15)] = p['chlUnderIce']
         v['chl'][np.isnan(v['chl'])] = p['chlUnderPersistentCloud']
@@ -112,7 +112,7 @@ def prey_saturation(v0, p):
 
         v['sat'] = np.maximum(v['satWC'], v['satIA'])
     
-    elif p['preySatVersion'].lower() == 'NOW_icealg':
+    if p['preySatVersion'].lower() == 'NOW_icealg':
         
         # Prey saturation considering water-column prey only
         # To be able to do arithmetic operations on dict we need to convert the list from the dict to numpy array
@@ -136,7 +136,8 @@ def prey_saturation(v0, p):
         
         v['sat'] = np.maximum(v['satWC'], v['satIA'])
 
-    else:
+    if p['preySatVersion'].lower() == 'default':
+        
         v['sat'] = np.array(v['P']) / (p['Ks'] + np.array(v['P']))
     
     return(v)
