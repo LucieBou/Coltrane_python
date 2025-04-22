@@ -112,7 +112,7 @@ def coltrane_forcing(region, Nyears):
         # Ice
         ice_file_path = os.path.join(script_dir, 'NOW_ice_concentration_timeseries_2013.csv')
         ice = pd.read_csv(ice_file_path)
-        forcing['ice'] = ice['Mean_Ice_Concentration']
+        forcing['ice'] = ice['Mean_Ice_Concentration_3km']
         
         keys = list(forcing.keys())
         keys.remove('t')
