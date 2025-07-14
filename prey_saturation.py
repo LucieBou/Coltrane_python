@@ -60,7 +60,7 @@ def prey_saturation(v0, p):
         
         v['sat'] = np.maximum(v['satWC'], v['satIA'])
         
-    elif p['preySatVersion'].lower() == 'biomas_dia19a':
+    if p['preySatVersion'].lower() == 'biomas_dia19a':
                 # Same as biomas_dia19 below, but tIA is a function of latitude chosen so that the time point 1/3
                 # of the way through the dtIA interval aligns with the bloom max a function of latitude from 
                 # Castellani et al. 2017 so dtIA and iceToSat are the free parameters.
@@ -82,7 +82,7 @@ def prey_saturation(v0, p):
 
                 v['sat'] = np.maximum(v['satWC'], v['satIA'])
 
-    elif p['preySatVersion'].lower() == 'biomas_dia19':
+    if p['preySatVersion'].lower() == 'biomas_dia19':
         if 'Ptot' not in v:
             v['Ptot'] = v['flagel'] + v['diatom']
 
@@ -99,7 +99,7 @@ def prey_saturation(v0, p):
 
                 v['sat'] = np.maximum(v['satWC'], v['satIA'])
 
-    elif p['preySatVersion'].lower() == 'satellite_dia18':
+    if p['preySatVersion'].lower() == 'satellite_dia18':
         # Prey saturation considering water-column prey only 
         v['chl'][np.isnan(v['chl']) & (np.array(v['ice']) > 0.15)] = p['chlUnderIce']
         v['chl'][np.isnan(v['chl'])] = p['chlUnderPersistentCloud']
@@ -111,8 +111,33 @@ def prey_saturation(v0, p):
         v['satIA'] = (np.array(v['ice']) > 0.15) * (np.array(v['yday']) > p['tIA']) * (np.array(v['yday']) < 270) * p['iceToSat']
 
         v['sat'] = np.maximum(v['satWC'], v['satIA'])
+    
+    if p['preySatVersion'].lower() == 'now_icealg':
+        
+        # Prey saturation considering water-column prey only
+        # To be able to do arithmetic operations on dict we need to convert the list from the dict to numpy array
+        v['satWC'] = np.array(v['P']) / (p['Ks'] + np.array(v['P']))
+        
+        # Ice alage index (IAind) mimicking Castellani et al., 2017, a function of yearday and latitude multiplied 
+        # by ice cover        
+        t_init = 60 # March 1st
+        t_max = 135 # May 15th
+        t_end = 215 # Beginning of August
+        IAind = np.zeros_like(v['yday'], dtype=float)
+        f = np.where((v['yday'] >= t_init) & (v['yday'] <= t_max))[0]
+        IAind[f] = np.array(v['ice'])[f] * (np.array(v['yday'])[f] - t_init) / (t_max - t_init)
+        f = np.where((v['yday'] >= t_max) & (v['yday'] <= t_end))[0]
+        IAind[f] = np.array(v['ice'])[f] * (1 - (np.array(v['yday'])[f] - t_max) / (t_end - t_max))
+        
+        # Prey saturation considering ice-algae only, based on an effective
+        # half-saturation (in index units, not chl units). I briefly tried an adjustable
+        # iceToSat multiplying this expression but tuning suggested that 1 is about right-- whereas KsIA << 1
+        v['satIA'] = IAind / (p['KsIA'] + IAind)
+        
+        v['sat'] = np.maximum(v['satWC'], v['satIA'])
 
-    else:
+    if p['preySatVersion'].lower() == 'default':
+        
         v['sat'] = np.array(v['P']) / (p['Ks'] + np.array(v['P']))
     
     return(v)

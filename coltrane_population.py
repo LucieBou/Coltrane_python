@@ -9,6 +9,7 @@ Coltrane - coltrane_population
 
 from tqdm import tqdm
 import numpy as np
+from joblib import Parallel, delayed
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -18,6 +19,12 @@ from add_strategy_to_params import add_strategy_to_params
 from coltrane_integrate import coltrane_integrate
 from drop_time_series import drop_time_series
 
+def run_strategy(i, forcing, p, s, t0, retain_time_series, ts_always_keep):
+    pii = add_strategy_to_params(p, s, i)
+    result = coltrane_integrate(forcing, pii, t0)
+    if not retain_time_series:
+        result = drop_time_series(result, ts_always_keep)
+    return result
 
 def coltrane_population(forcing,p,nargout):
     '''
@@ -80,16 +87,19 @@ def coltrane_population(forcing,p,nargout):
     t0,s = timing_combinations(forcing, p)
     strategy_fields = list(s.keys())
     NC = len(t0)
-    NS = np.prod(s[strategy_fields[0]].shape)  # Assuming there are two strategy fields
+    NS = np.prod(s[strategy_fields[0]].shape)
     
     # Run one strategy at a time ---------------------------------------------------------------------------
     
     out = [None] * NS
     print(f"{NT} timesteps x {NC} compupods x {NS} strategies")
 
-    for i in tqdm(range(NS), desc="Running strategies"):
+    #out = Parallel(n_jobs=-1)(delayed(run_strategy)(i, forcing, p, s, t0, retain_time_series, ts_always_keep) for i in range(NS))
+
+    for i in range(NS):
+    #for i in tqdm(range(NS), desc="Running strategies"):
         pii = add_strategy_to_params(p, s, i)
-        out[i] = coltrane_integrate(forcing, pii, t0)  # Replace with your actual function
+        out[i] = coltrane_integrate(forcing, pii, t0) 
         if not retain_time_series:
             out[i] = drop_time_series(out[i], ts_always_keep)
     

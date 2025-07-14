@@ -11,7 +11,7 @@ import os
 import pickle
 import numpy as np
 
-def time_series_NOW_BB(region, year1, year2, folder_path, extend):
+def time_series_NOW_BB(region, year1, year2, extend):
     """
     Time series of different environmental and biological variables from a 
     coupled biogeochemical model on an Arctic and Northern Hemisphere Atlantic 
@@ -55,7 +55,7 @@ def time_series_NOW_BB(region, year1, year2, folder_path, extend):
 
     """
     
-    os.chdir(folder_path)
+    #os.chdir(folder_path)
     
     # Initialize the ts outputs
     ts = {'t_yr': [],
@@ -73,7 +73,11 @@ def time_series_NOW_BB(region, year1, year2, folder_path, extend):
     if region == 'BB':
         
         # Open the dict with all the profiles (all years)
-        with open('BB_profiles_2002-2021_dict.pkl', 'rb') as file:
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Répertoire du script
+        file_path = os.path.join(script_dir, 'BB_profiles_2002-2021_dict.pkl')
+        
+        with open(file_path, 'rb') as file:
                 BB_profiles_all = pickle.load(file)
         
         # Select only the years we want
@@ -232,7 +236,10 @@ def time_series_NOW_BB(region, year1, year2, folder_path, extend):
     if region == 'NOW':
         
         # Open the dict with all the profiles (all years)
-        with open('NOW_profiles_2002-2021_dict.pkl', 'rb') as file:
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Répertoire du script
+        file_path = os.path.join(script_dir, 'NOW_profiles_2002-2021_dict.pkl')
+        
+        with open(file_path, 'rb') as file:
                 NOW_profiles_all = pickle.load(file)
 
         # Select only the years we want
