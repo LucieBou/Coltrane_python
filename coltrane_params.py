@@ -60,6 +60,7 @@ def coltrane_params(**kwargs):
     p = set_default(p, 'min_genlength_years', 0)
     p = set_default(p, 'max_genlength_years', float('inf'))
     # range of generation lengths to evaluate (in integer years)
+    p = set_default(p, 'AllowActiveDiapause', 1) # 0 for a real diapause and 1 for a potentiel active diapause during winter
     
     ## PREDATION
     p = set_default(p, 'preySatVersion', 'default')
@@ -102,6 +103,7 @@ def coltrane_params(**kwargs):
     
     ## MORTALITY
     # set mortality (m0 = mortality at W = 1 µgC, T = 0)
+    p = set_default(p, 'mortality_penalty', 0.1)
     p = set_default(p, 'm0_over_GGE_I0', 0.67)
     p = set_default(p, 'm0', p['m0_over_GGE_I0'] * p['GGE_nominal'] * p['I0'])
     p['m0_over_GGE_I0'] = p['m0'] / p['GGE_nominal'] / p['I0']

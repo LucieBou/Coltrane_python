@@ -136,35 +136,18 @@ def coltrane_integrate(forcing,p,t0):
     # if np.all(toolate):
     #     return None # if there are no good solutions at all, don't bother with the rest of the model
     
-    # Calculate D in middle of first winter, just as a diagnostic
-    year = v['t0'] // 365
-    first31dec = 365 + year * 365
-    first31dec = np.tile(first31dec, (NT,1))
+    isalive = isalive & ~np.isnan(v['D'])
+    isfeeding = isfeeding & isalive
+    isineggprod = isineggprod & isalive
 
-    is31dec = np.abs(v['t'] - first31dec) == np.tile(np.min(np.abs(v['t'] - first31dec), axis=0), (NT,1))
-    is31dec = is31dec & np.cumsum(is31dec, axis=0) == 1
-
-    v['D_winter'] = np.reshape(v['D'][is31dec], NC)
-    
     # Flag time points at which the animal is in diapause but at a
     # diapause-incapable stage, and mark these cases as dead
     isactive = isalive & ((v['a'] == 1) | (~isfeeding))
     hasbeenactive = np.cumsum(isactive, axis=0) >= 1
     isfailingtodiapause = isalive & hasbeenactive & (v['a'] == 0) & (v['D'] < p['Ddia'])
     hasfailedtodiapause = np.cumsum(isfailingtodiapause, axis=0) > 1
-    v['D'][hasfailedtodiapause] = np.nan
-    v['level'][~np.any(hasfailedtodiapause, axis=0)] = 1  # level 1 = successful diapause
-    
-    isalive = isalive & ~np.isnan(v['D'])
-    isfeeding = isfeeding & isalive
-    isineggprod = isineggprod & isalive
-
-    # Date on which D=1 is reached (another diagnostic)
-    tD1 = v['t'].astype(float).copy()
-    hasreachedadulthood = (v['D'] < 1) | (~np.isfinite(v['D']))
-    tD1[hasreachedadulthood] = np.nan
-    v['tD1'] = np.nanmin(tD1, axis = 0)
-    v['level'][np.any(v['D'] == 1, axis = 0)] = 2  # level 2 = reaches adulthood
+    # v['D'][hasfailedtodiapause] = np.nan # EVENTUELLEMENT ENLEVER CA ET LEUR LAISSER UNE CHANCE SI D > Ds
+    # v['level'][~np.any(hasfailedtodiapause, axis=0)] = 1  # level 1 = successful diapause
 
     # Energy gain, Growth and Egg production: G(t), W(t), R(t), E(t) ----------------------------------------       
     
@@ -183,9 +166,47 @@ def coltrane_integrate(forcing,p,t0):
     v['R'] = np.zeros((NT, NC)) # Reserves
     v['Einc'] = np.zeros((NT, NC)) # Income breeding
     v['E'] = np.zeros((NT, NC)) # Egg production
+    v['m'] = np.zeros((NT, NC)) # Mortality
     astar = p['rb'] + (1 - p['rb']) * v['a']
     
     for n in range(0,NT-1):
+        
+        # Condition 1: if individuals that are suppose to go to diapause are starving, attribute 
+        # them a chance by staying at the surface and not enter diapause
+        istooempty = (v['a'][n, :] == 0) & (v['R'][n, :] < -p['rstarv'] * v['W'][n, :]) & (p['AllowActiveDiapause']==1) 
+        
+        # Condition 2: if an individual is not old enough to enter diapause but is old enough to
+        # store lipids, it can stay active during diapause
+        istooyoung = (v['a'][n, :] == 0) & hasfailedtodiapause[n, :] & (v['D'][n, :] > p['Ds']) & (p['AllowActiveDiapause']==1)
+        
+        if np.sum(istooempty) > 0: 
+            v['a'][n, istooempty] = 1
+            v['temp'][n, istooempty] = v['T0'][n, istooempty]
+            qd[n, istooempty] = (p['Q10d'] ** 0.1) ** v['temp'][n, istooempty]
+            qg[n, istooempty] = (p['Q10g'] ** 0.1) ** v['temp'][n, istooempty]
+            astar[n, istooempty] = p['rb'] + (1 - p['rb']) * v['a'][n, istooempty]
+            
+            # because it stay active, we need to recompute its development to update it (I think it is time consuming - can be change by including D in the loop)
+            dDdt_update = isalive[n:,istooempty] * p['u0'] * qd[n:,istooempty] * v['a'][n:,istooempty] * v['sat'][n:,istooempty]
+            v['D'][n:,istooempty] = v['D'][n-1,istooempty] + np.cumsum(dDdt_update, axis=0) * dt
+            
+            isfeeding[n, istooempty] = v['D'][n, istooempty] >= p['Df']
+        
+        if np.sum(istooyoung) > 0:  
+            v['a'][n, istooyoung] = 1
+            v['temp'][n, istooyoung] = v['T0'][n, istooyoung]
+            qd[n, istooyoung] = (p['Q10d'] ** 0.1) ** v['temp'][n, istooyoung]
+            qg[n, istooyoung] = (p['Q10g'] ** 0.1) ** v['temp'][n, istooyoung]
+            astar[n, istooyoung] = p['rb'] + (1 - p['rb']) * v['a'][n, istooyoung]
+            
+            # because it stay active, we need to recompute its development to update it
+            dDdt_update = isalive[n:,istooyoung] * p['u0'] * qd[n:,istooyoung] * v['a'][n:,istooyoung] * v['sat'][n:,istooyoung]
+            v['D'][n:,istooyoung] = v['D'][n-1,istooyoung] + np.cumsum(dDdt_update, axis=0) * dt
+            
+            isfeeding[n, istooyoung] = v['D'][n, istooyoung] >= p['Df'] # Not really necessary here as D > Ds is a condition and Ds > Df
+        
+        v['D'][n, :][v['D'][n, :] > 1] = 1
+        
         # For each timestep, we calculate the growth and energy gain for each cohort.
         f = isfeeding[n, :]
         e = isineggprod[n, :]
@@ -223,6 +244,24 @@ def coltrane_integrate(forcing,p,t0):
         v['E'][n, :] = v['Einc'][n, :] + dR / dt
         v['W'][n+1, :] = v['W'][n+1, :] - dR
         v['R'][n+1, :] = v['R'][n+1, :] - dR
+        
+        # Mortality
+        # Should have enter diapause but haven't
+        remainedactive = (p['AllowActiveDiapause']==1) & (v['a'][n, :] == 1) & (v['yday'][n, :] >= p['tdia_enter']) & (v['yday'][n, :] <= p['tdia_exit'])
+        penalty = np.where(remainedactive, p['mortality_penalty'], 0.0)
+        v['m'][n, :] = (p['m0'] + penalty) * qg[n, :] * v['a'][n, :] * v['W'][n, :]**(p['theta'] - 1)
+    
+    # Update D according to diapausing copepods
+    isactive = isalive & ((v['a'] == 1) | (~isfeeding))
+    hasbeenactive = np.cumsum(isactive, axis=0) >= 1
+    isfailingtodiapause = isalive & hasbeenactive & (v['a'] == 0) & (v['D'] < p['Ddia'])
+    hasfailedtodiapause = np.cumsum(isfailingtodiapause, axis=0) > 1
+    v['D'][hasfailedtodiapause] = np.nan 
+    v['level'][~np.any(hasfailedtodiapause, axis=0)] = 1  # level 1 = successful diapause
+    
+    isalive = isalive & ~np.isnan(v['D'])
+    isfeeding = isfeeding & isalive
+    isineggprod = isineggprod & isalive
     
     # Adult size Wa, Ra (= size at the moment egg prod begins)
     last = ~isineggprod[0:-1, :] & isineggprod[1:, :]
@@ -252,6 +291,23 @@ def coltrane_integrate(forcing,p,t0):
     v['W_C56win'] = np.nanmean(v['W'] * iswinlatestage, axis=0)
     v['R_C56win'] = np.nanmean(v['R'] * iswinlatestage, axis=0)
     
+    # Diagnostic 1: Calculate D in middle of first winter
+    year = v['t0'] // 365
+    first31dec = 365 + year * 365
+    first31dec = np.tile(first31dec, (NT,1))
+
+    is31dec = np.abs(v['t'] - first31dec) == np.tile(np.min(np.abs(v['t'] - first31dec), axis=0), (NT,1))
+    is31dec = is31dec & np.cumsum(is31dec, axis=0) == 1
+
+    v['D_winter'] = np.reshape(v['D'][is31dec], NC)
+    
+    # Diagnostic 2: Date on which D=1 is reached
+    tD1 = v['t'].astype(float).copy()
+    hasreachedadulthood = (v['D'] < 1) | (~np.isfinite(v['D']))
+    tD1[hasreachedadulthood] = np.nan
+    v['tD1'] = np.nanmin(tD1, axis = 0)
+    v['level'][np.any(v['D'] == 1, axis = 0)] = 2  # level 2 = reaches adulthood
+    
     # Check for starvation
     isstarving = v['R'] < -p['rstarv'] * v['W']
     isalive = isalive & (np.cumsum(isstarving, axis=0) == 0)
@@ -265,8 +321,8 @@ def coltrane_integrate(forcing,p,t0):
     
     # Mortality and survivorship: N(t) ---------------------------------------------------------------------
     
-    v['m'] = np.zeros((NT, NC))
-    v['m'][isalive] = p['m0'] * qg[isalive] * v['a'][isalive] * v['W'][isalive]**(p['theta'] - 1) # mort. rate at T, size
+    # v['m'] = np.zeros((NT, NC))
+    # v['m'][isalive] = p['m0'] * qg[isalive] * v['a'][isalive] * v['W'][isalive]**(p['theta'] - 1) # mort. rate at T, size
     v['lnN'] = np.cumsum(-v['m'], axis=0) * dt
     # Calculate adult recruitment (= recruitment at the moment egg prod begins)
     lnNa = v['lnN'].copy()

@@ -10,3 +10,6 @@ __pycache__/
 
 # Ignore disko_ex file
 disko_ex
+
+# Ignorer virtual environment
+.venv
