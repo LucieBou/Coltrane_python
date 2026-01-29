@@ -60,6 +60,8 @@ def coltrane_params(**kwargs):
     p = set_default(p, 'min_genlength_years', 0)
     p = set_default(p, 'max_genlength_years', float('inf'))
     # range of generation lengths to evaluate (in integer years)
+    p = set_default(p, 'a_winter', 0.2) 
+    # Between 0 - for a nul activity level during winter as in the original version - and 1 - for a full activity level in winter
     
     ## PREDATION
     p = set_default(p, 'preySatVersion', 'default')

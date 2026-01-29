@@ -76,9 +76,9 @@ def coltrane_integrate(forcing,p,t0):
     
     # Activity: a(t) ----------------------------------------------------------------------------------------                      
     
-    v['a'] = np.double(~((v['yday'] >= p['tdia_enter']) | (v['yday'] <= p['tdia_exit']))) # There is an offset 
-    # of 1 with respect to the matlab code and a value of 1 is missing each time. 
-    # Is this due to the difference in days?
+    v['a'] = np.double(~((v['yday'] >= p['tdia_enter']) | (v['yday'] <= p['tdia_exit']))) 
+    v['a'][v['a'] == 0] = p['a_winter'] # Replace zeros by the winter activity level parameter
+    
     isalive = v['t'] >= np.tile(v['t0'], (NT,1))
     
     if p['requireActiveSpawning']:
@@ -148,9 +148,9 @@ def coltrane_integrate(forcing,p,t0):
     
     # Flag time points at which the animal is in diapause but at a
     # diapause-incapable stage, and mark these cases as dead
-    isactive = isalive & ((v['a'] == 1) | (~isfeeding))
+    isactive = isalive & ((v['a'] > 0) | (~isfeeding))
     hasbeenactive = np.cumsum(isactive, axis=0) >= 1
-    isfailingtodiapause = isalive & hasbeenactive & (v['a'] == 0) & (v['D'] < p['Ddia'])
+    isfailingtodiapause = isalive & hasbeenactive & (v['a'] < 1) & (v['D'] < p['Ddia'])
     hasfailedtodiapause = np.cumsum(isfailingtodiapause, axis=0) > 1
     v['D'][hasfailedtodiapause] = np.nan
     v['level'][~np.any(hasfailedtodiapause, axis=0)] = 1  # level 1 = successful diapause
