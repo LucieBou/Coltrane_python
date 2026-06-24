@@ -29,7 +29,10 @@ def timing_combinations(forcing, p):
     '''
     
     ## SPAWNING DATE
-    t0 = np.arange(forcing['t'][0], forcing['t'][-1]-365 + .1 + p['dt_spawn'], p['dt_spawn'])
+    if p['t0_first_year_only']:
+        t0 = np.arange(forcing['t'][0], forcing['t'][0] + 365 + .1, p['dt_spawn'])
+    else:
+        t0 = np.arange(forcing['t'][0], forcing['t'][-1] - 365 + .1 + p['dt_spawn'], p['dt_spawn'])
     
     ## YEARDAY OF DIAPAUSE EXIT
     tdia_exit = p['tdia_exit']

@@ -50,6 +50,7 @@ def coltrane_params(**kwargs):
     
     ## LIFE CYCLE
     p = set_default(p, 'dt_spawn', 15)  # resolution (d) of spawning date cases
+    p = set_default(p, 't0_first_year_only', False) # spawning dates the first year only if True
     p = set_default(p, 'tdia_exit', [])  # set of diapause exit dates to consider
     # if this is empty, constructs a set using dt_dia
     p = set_default(p, 'tdia_enter', [])  # set of diapause entry dates to consider
